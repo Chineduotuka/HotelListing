@@ -2,9 +2,11 @@ using HotelListing.Configuration;
 using HotelListing.Data;
 using HotelListing.IRepository;
 using HotelListing.Repository;
+using HotelListing.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -25,7 +27,7 @@ namespace HotelListing
         {
             Configuration = configuration;
         }
-
+         
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -36,6 +38,9 @@ namespace HotelListing
 
             services.AddDbContext<DataBaseContext>(options => options.UseSqlServer(Configuration.GetConnectionString("sqlConnection")));
 
+            services.AddAuthentication();
+            services.ConfigureIdentity();
+            services.ConfigureJWT(Configuration);
             services.AddCors(x =>
             {
                 x.AddPolicy("corsPolicy", builder =>
@@ -47,6 +52,7 @@ namespace HotelListing
 
             services.AddAutoMapper(typeof(MapperInitilizer));
             services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IAuthManager, AuthManager>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "HotelListing", Version = "v1" });
